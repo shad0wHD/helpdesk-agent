@@ -1,0 +1,42 @@
+[
+  {
+    "title": "VPN Access Troubleshooting Runbook",
+    "source": "confluence",
+    "content": "VPN access issues are one of the most common service desk requests. Follow this runbook:\n\n1. Verify the employee exists in the HR directory and has a valid VPN group assignment.\n2. Check if the Cisco AnyConnect client is installed (minimum version 4.10). Download from: https://software.acme.com/vpn\n3. Ensure the employee is using the correct VPN server: vpn.acme.com (global) or vpn-eu.acme.com (EU employees).\n4. If the account is locked, reset via the IT Admin Portal. Lockouts happen after 5 failed attempts.\n5. For new employees (< 30 days), VPN provisioning can take up to 2 business hours after HR confirmation.\n6. Engineering and Sales teams have separate VPN groups (engineering-vpn, sales-vpn). Confirm the correct group is assigned.\n\nETA for resolution: Same business day for existing employees, up to 2 hours for new employees."
+  },
+  {
+    "title": "New Employee Onboarding Checklist",
+    "source": "confluence",
+    "content": "When a new employee joins, IT must complete the following within their first day:\n\n1. Create accounts: Active Directory, email (Google Workspace), Slack, Jira, GitHub\n2. Provision VPN access based on department group (engineering-vpn, sales-vpn, hr-vpn, finance-vpn)\n3. Assign hardware: MacBook Pro 14\" for engineers, MacBook Air for other roles\n4. Add to department Slack channels\n5. Schedule IT orientation within the first week\n6. Set up MFA on all accounts\n\nManagers must submit the New Hire IT Request form at least 48 hours before the employee's start date."
+  },
+  {
+    "title": "Password Reset Procedure",
+    "source": "confluence",
+    "content": "Employees can reset their own password via the self-service portal at https://reset.acme.com using their employee ID and backup email.\n\nIf the account is fully locked out:\n1. The employee must verify identity via manager confirmation or photo ID\n2. IT admin resets via the AD Admin Console\n3. Temporary password is valid for 24 hours and must be changed on first login\n4. MFA must be re-enrolled after a full account reset\n\nSLA: Password resets are resolved within 30 minutes during business hours (9am–6pm EST)."
+  },
+  {
+    "title": "Laptop Hardware Request Process",
+    "source": "confluence",
+    "content": "Hardware requests must be approved by the employee's direct manager.\n\nStandard equipment:\n- Engineers: MacBook Pro 14\" M3 Pro (16GB RAM, 512GB SSD)\n- All other roles: MacBook Air M3 (8GB RAM, 256GB SSD)\n- Additional monitors: Dell 27\" 4K — one per employee, approved automatically\n- Standing desks: require VP approval\n\nProcess:\n1. Employee submits request via Jira Service Desk\n2. Manager approves in the ticket within 2 business days\n3. IT orders from Apple Business or pulls from inventory\n4. Delivery: 3–5 business days from inventory, 2–3 weeks for custom orders\n\nFor urgent replacements (broken/stolen), escalate to priority High in Jira."
+  },
+  {
+    "title": "Software License Request and Installation",
+    "source": "confluence",
+    "content": "Approved software list is maintained at https://software.acme.com/catalog.\n\nFor software on the approved list:\n- Engineers can self-install via the Company Portal app\n- Licenses are provisioned automatically within 15 minutes\n\nFor software NOT on the approved list:\n1. Submit a Jira ticket with business justification\n2. Security team reviews within 3 business days\n3. Legal reviews any enterprise contracts\n4. Finance approves if cost > $500/year\n\nDo not install unapproved software — it will be flagged by endpoint security and may result in device wipe."
+  },
+  {
+    "title": "Slack Access and Workspace Management",
+    "source": "confluence",
+    "content": "Slack is provisioned automatically when a new employee account is created in Active Directory.\n\nCommon issues:\n- Guest access: External contractors get single-channel guest accounts. Submit a Jira ticket with the contractor's email and the channel they need access to.\n- Deactivated accounts: Former employees' accounts are deactivated within 1 hour of their termination in HR.\n- Channel creation: Any employee can create public channels. Private channels require manager approval.\n- Enterprise Grid: We use Slack Enterprise Grid with separate workspaces per business unit. Cross-workspace messaging is enabled.\n\nFor bulk Slack issues (multiple users affected), escalate to the Platform team via #it-platform-escalations."
+  },
+  {
+    "title": "IT Escalation Policy and Priority Levels",
+    "source": "confluence",
+    "content": "Priority definitions:\n\n- P1 (Critical): Production system down, data breach, >10 users impacted. SLA: 15-minute response, 2-hour resolution.\n- P2 (High): Key employee blocked, VPN down, single system outage. SLA: 1-hour response, same-day resolution.\n- P3 (Medium): Standard access issues, software requests. SLA: 4-hour response, 2-business-day resolution.\n- P4 (Low): Non-urgent requests, information queries. SLA: 1-business-day response, 5-business-day resolution.\n\nEscalation path: L1 Service Desk → L2 IT Operations → L3 Platform Engineering → CTO\n\nFor P1/P2 issues, also post in #it-incidents and page the on-call engineer via PagerDuty."
+  },
+  {
+    "title": "Google Workspace (Gmail, Drive, Calendar) Access Issues",
+    "source": "confluence",
+    "content": "Google Workspace access is tied to the employee's @acme.com Google account.\n\nCommon issues and fixes:\n- Suspended account: Usually due to suspicious login activity. IT admin unsuspends via Google Admin Console. Requires MFA re-enrollment.\n- Drive storage full: Default quota is 100GB. Request increase via Jira — approved automatically for engineers, requires manager approval for others.\n- Calendar sharing: Employees can share calendars within the org. External sharing requires IT approval.\n- Groups/distribution lists: Managed by IT. Submit a Jira ticket to add/remove members or create new groups.\n\nFor email deliverability issues or suspected phishing, contact security@acme.com immediately."
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "FastAPI dev server",
+      "runtimeExecutable": "uvicorn",
+      "runtimeArgs": ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
+      "port": 8000
+    },
+    {
+      "name": "PostgreSQL (Docker)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "up", "postgres"],
+      "port": 5432
+    },
+    {
+      "name": "Full stack (Docker)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "up"],
+      "port": 8000,
+      "autoPort": false
+    },
+    {
+      "name": "Demo (no credentials needed)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["demo.py"],
+      "port": 0
+    }
+  ]
+}

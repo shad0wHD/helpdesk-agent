@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/**)",
+      "Read(//c/Users/yarde/AppData/Local/Python/**)",
+      "Bash(python3 -m pip install -e \".[dev]\")",
+      "Bash(~/AppData/Local/Python/bin/python.exe -m pip install -e \".[dev]\")",
+      "Bash(ANTHROPIC_API_KEY=test SLACK_BOT_TOKEN=test SLACK_SIGNING_SECRET=test SLACK_APP_TOKEN=test JIRA_BASE_URL=https://x.atlassian.net JIRA_EMAIL=x@x.com JIRA_API_TOKEN=test ~/AppData/Local/Python/bin/python.exe -m pytest tests/ -v)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\yarde\\\\Work\\\\git-repos\\\\gabor\\\\service-desk-agent\\\\.claude\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(~/AppData/Local/Python/bin/python.exe -m pip install langchain-groq --quiet)",
+      "Bash(GROQ_API_KEY=test SLACK_BOT_TOKEN=test SLACK_SIGNING_SECRET=test SLACK_APP_TOKEN=test JIRA_BASE_URL=https://x.atlassian.net JIRA_EMAIL=x@x.com JIRA_API_TOKEN=test ~/AppData/Local/Python/bin/python.exe -m pytest tests/ -v)",
+      "Bash(docker compose *)"
+    ]
+  }
+}
