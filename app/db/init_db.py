@@ -22,16 +22,6 @@ async def create_tables() -> None:
 
 
 async def seed_knowledge_base(session: AsyncSession) -> None:
-    from app.config import settings
-
-    if not settings.anthropic_api_key:
-        log.warning(
-            "ANTHROPIC_API_KEY not set — skipping knowledge base seeding. "
-            "RAG will return no results until you seed the DB. "
-            "Run `python -m app.db.init_db` after setting the key."
-        )
-        return
-
     from app.tools.embedder import embed_text
 
     seed_path = Path(__file__).parent.parent.parent / "data" / "knowledge_base.json"
@@ -42,6 +32,7 @@ async def seed_knowledge_base(session: AsyncSession) -> None:
         log.info("Knowledge base already seeded (%d docs), skipping.", existing)
         return
 
+    log.info("Seeding %d documents (embedding locally with fastembed)...", len(docs))
     for doc in docs:
         embedding = await embed_text(doc["content"])
         session.add(
@@ -53,7 +44,7 @@ async def seed_knowledge_base(session: AsyncSession) -> None:
             )
         )
     await session.commit()
-    log.info("Seeded %d documents into knowledge base.", len(docs))
+    log.info("Knowledge base seeded with %d documents.", len(docs))
 
 
 async def init_db() -> None:

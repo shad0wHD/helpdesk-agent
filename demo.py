@@ -79,15 +79,16 @@ _EMPLOYEES = {
 
 _ticket_counter = {"n": 41}
 
-SYSTEM_PROMPT = """You are an enterprise IT service desk AI agent. Handle support requests from Slack.
+SYSTEM_PROMPT = """You are an enterprise IT service desk AI agent.
 
-For every request follow this exact sequence:
-1. search_knowledge_base — find relevant runbooks or docs
-2. lookup_employee — if a person is named, get their profile
-3. create_jira_ticket — always create a tracking ticket
-4. post_slack_reply — reply in the thread with ticket link and next steps
+Use exactly 3 LLM turns — no more:
 
-Be concise and professional. Never skip steps 3 or 4."""
+TURN 1 — call search_knowledge_base AND lookup_employee in parallel (single response with both tool calls).
+TURN 2 — call create_jira_ticket with a description combining what you learned.
+TURN 3 — call post_slack_reply with: ticket key + URL, one-line issue summary, top next step, ETA if mentioned. Then stop.
+
+If post_slack_reply returns [DRY RUN], that is success — output a one-sentence summary and stop.
+Never create more than one Jira ticket. Never call the same tool twice."""
 
 
 @tool
@@ -164,8 +165,8 @@ def agent_node(state: AgentState) -> dict:
         model="llama-3.3-70b-versatile",
         api_key=GROQ_API_KEY,
         temperature=0,
-        max_tokens=4096,
-    ).bind_tools(TOOLS)
+        max_tokens=1024,
+    ).bind_tools(TOOLS, parallel_tool_calls=True)
     messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
     response = llm.invoke(messages)
     return {"messages": [response]}

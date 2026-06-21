@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     environment: str = "development"
 
     # LLM model used throughout the agent graph
-    model: str = "llama-3.3-70b-versatile"
+    model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 
 settings = Settings()  # type: ignore[call-arg]

@@ -3,15 +3,13 @@
 Flow:
     START → agent (tool-calling loop) → END
 
-The agent has four tools:
+The agent has three tools:
   1. search_knowledge_base  — RAG over company docs
   2. lookup_employee        — HR directory
-  3. create_jira_ticket     — Jira REST API
-  4. post_slack_reply       — Slack thread reply
-
-The system prompt enforces a strict execution order so the agent always
-gathers context before creating tickets and always closes with a Slack reply.
+  3. post_answer            — Slack reply with optional ticket escalation button
 """
+
+import logging
 
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage
@@ -22,30 +20,18 @@ from typing_extensions import Annotated, TypedDict
 
 from app.config import settings
 from app.tools.hr_lookup import lookup_employee
-from app.tools.jira import create_jira_ticket
 from app.tools.rag import search_knowledge_base
-from app.tools.slack_reply import post_slack_reply
+from app.tools.slack_reply import post_answer
 
-TOOLS = [search_knowledge_base, lookup_employee, create_jira_ticket, post_slack_reply]
+log = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are an enterprise IT service desk AI agent. Your job is to handle
-support requests that come from Slack and resolve them efficiently.
+TOOLS = [search_knowledge_base, lookup_employee, post_answer]
 
-For every request you MUST follow this sequence:
-1. **Search the knowledge base** — find existing documentation, runbooks, or solutions.
-2. **Look up the employee** — if a person is named, retrieve their HR profile for context.
-3. **Create a Jira ticket** — always create a ticket to track the work. Write a clear,
-   detailed description using what you learned from steps 1 and 2.
-4. **Post a Slack reply** — reply in the original thread with:
-   - A brief summary of the issue
-   - The Jira ticket key and link
-   - Recommended next steps (from the knowledge base)
-   - ETA if the runbook mentions one
-
-Be concise, professional, and action-oriented. Never skip steps 3 or 4.
-Always pass the slack_channel and slack_ts to create_jira_ticket and post_slack_reply.
-If post_slack_reply returns a [DRY RUN] message, that counts as success — summarise what was done and stop.
-"""
+SYSTEM_PROMPT = """You are an IT service desk agent. Follow these steps in order — do not skip any:
+1. Call search_knowledge_base with a relevant query.
+2. Call lookup_employee with the requester's name (if mentioned; use "unknown" if not).
+3. Call post_answer with: a helpful answer containing 2-3 specific steps sourced from the knowledge base (not generic advice), a one-line question_summary, requester_name and requester_email from your HR lookup, and the slack_channel and thread_ts values.
+You MUST call post_answer as the final step. Never call the same tool twice."""
 
 
 class AgentState(TypedDict):
@@ -59,14 +45,18 @@ def _make_llm() -> ChatGroq:
         model=settings.model,
         api_key=settings.groq_api_key,
         temperature=0,
-        max_tokens=4096,
+        max_tokens=1024,
     ).bind_tools(TOOLS)
 
 
-def agent_node(state: AgentState) -> dict:
+async def agent_node(state: AgentState) -> dict:
     llm = _make_llm()
-    messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
-    response = llm.invoke(messages)
+    prompt = SYSTEM_PROMPT + f"\n\nslack_channel={state['slack_channel']} slack_ts={state['slack_ts']}"
+    messages = [SystemMessage(content=prompt)] + state["messages"]
+    response = await llm.ainvoke(messages)
+    tool_names = [tc["name"] for tc in (response.tool_calls or [])]
+    log.info("Agent turn %d — tools called: %s | text: %s",
+             len(state["messages"]), tool_names or "none (final)", str(response.content)[:120])
     return {"messages": [response]}
 
 

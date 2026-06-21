@@ -21,6 +21,8 @@ services:
     environment:
       # Override localhost → docker service name for inter-container networking
       DATABASE_URL: postgresql+psycopg://agent:agent@postgres:5432/servicedesk
+      # Use the model already baked into the image — skip HuggingFace network checks
+      HF_HUB_OFFLINE: "1"
     ports:
       - "8000:8000"
     depends_on:

@@ -7,6 +7,7 @@ Routes:
 Slack events arrive via Socket Mode (WebSocket), not HTTP — no /slack/events route needed.
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -25,11 +26,25 @@ log = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    # Pre-load the fastembed ONNX model so the first Slack mention isn't slow
+    from app.tools.embedder import embed_text
+    await embed_text("warmup")
     socket_handler = create_socket_handler()
-    await socket_handler.connect_async()
-    log.info("Service desk agent ready — Slack Socket Mode connected.")
+    # start_async() runs the WebSocket listener loop — must be a background task
+    # so it doesn't block the lifespan and keeps running for the app's lifetime
+    def _on_slack_task_done(task: asyncio.Task) -> None:
+        if not task.cancelled() and task.exception():
+            log.error("Slack Socket Mode task crashed: %s", task.exception())
+
+    slack_task = asyncio.create_task(socket_handler.start_async())
+    slack_task.add_done_callback(_on_slack_task_done)
+    log.info("Service desk agent ready — Slack Socket Mode listening.")
     yield
-    await socket_handler.disconnect_async()
+    slack_task.cancel()
+    try:
+        await slack_task
+    except asyncio.CancelledError:
+        pass
     log.info("Slack Socket Mode disconnected.")
 
 

@@ -18,7 +18,7 @@ class Document(Base):
     title: Mapped[str] = mapped_column(String(512))
     content: Mapped[str] = mapped_column(Text)
     source: Mapped[str] = mapped_column(String(256))  # e.g. "confluence", "gdrive"
-    embedding: Mapped[list[float]] = mapped_column(Vector(1536))
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 

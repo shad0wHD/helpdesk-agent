@@ -1,24 +1,28 @@
-"""Text embedding via Anthropic's voyage-3 model through the anthropic SDK."""
+"""Local text embeddings via fastembed (no API key required).
 
-import anthropic
+Model: BAAI/bge-small-en-v1.5 — 384 dimensions, ~130MB, CPU-only.
+Downloaded automatically on first use and cached in ~/.cache/fastembed.
+"""
 
-from app.config import settings
+from functools import lru_cache
 
-_client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+from fastembed import TextEmbedding
+
+MODEL_NAME = "BAAI/bge-small-en-v1.5"
+EMBEDDING_DIM = 384
+
+
+@lru_cache(maxsize=1)
+def _model() -> TextEmbedding:
+    return TextEmbedding(model_name=MODEL_NAME)
 
 
 async def embed_text(text: str) -> list[float]:
-    """Return a 1536-dim embedding vector for the given text."""
-    response = await _client.embeddings.create(
-        model="voyage-3",
-        input=text,
-    )
-    return response.embeddings[0].values
+    """Return a 384-dim embedding vector. Runs synchronously (CPU-bound, fast enough)."""
+    embeddings = list(_model().embed([text]))
+    return embeddings[0].tolist()
 
 
 async def embed_batch(texts: list[str]) -> list[list[float]]:
-    response = await _client.embeddings.create(
-        model="voyage-3",
-        input=texts,
-    )
-    return [r.values for r in response.embeddings]
+    embeddings = list(_model().embed(texts))
+    return [e.tolist() for e in embeddings]
